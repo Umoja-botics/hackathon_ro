@@ -25,7 +25,7 @@ class MapListener(Node):
         self.get_logger().info('Map data received and converted to matrix.')
 
         # Sauvegarder la matrice dans un fichier
-        save_path = 'map_matrix.npy'
+        save_path = 'map_matrix4.npy'
         np.save(save_path, self.map_data)
         self.get_logger().info(f'Map matrix saved to {save_path}')
 
@@ -41,7 +41,7 @@ class MapListener(Node):
             image_data = image_data.astype(np.uint8)
 
             # Sauvegarder l'image en utilisant OpenCV
-            image_path = 'map_image.png'
+            image_path = 'map_image2.png'
             cv2.imwrite(image_path, image_data)
             self.get_logger().info(f'Map image saved to {image_path}')
 

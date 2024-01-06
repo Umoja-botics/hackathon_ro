@@ -13,6 +13,7 @@ import math
 import heapq
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 
 
@@ -244,28 +245,49 @@ def remap_coordinates(coord, grid_shape):
 
     return (new_x, new_y)
 
+def import_json(json_file_path):
+
+    point = []
+    # Read and load the JSON data
+    with open(json_file_path, 'r') as file:
+        json_data = json.load(file)
+    
+    point.append((json_data["start"][3:][0],json_data["start"][3:][1]))
+    for i in range (len(json_data["waypoints"])):
+        point.append((json_data["waypoints"][i][3:][0],json_data["waypoints"][i][3:][1]))
+        
+    return point
+
 
 def main():
 
         # Load the map matrix
     map_matrix_path = 'map_matrix.npy'  # Update this to the correct path
+    json_file_path = 'challenge1_waypoints_01.json' # import the json file
     map_matrix = np.load(map_matrix_path)
     norm_occupancy_grid = np.copy(map_matrix)
     norm_occupancy_grid[norm_occupancy_grid == -1] = 50
     norm_occupancy_grid = norm_occupancy_grid / 100
 
-    s_start = (5, 5)
-    s_goal = (400, 500)
+    # s_start = (5, 5)
+    # s_goal = (400, 500)
 
-    astar = AStar(s_start, s_goal, "euclidean", norm_occupancy_grid)
+    waypoint = import_json(json_file_path)
+
+    for i in range (len(waypoint)-1):
+
+        astar = AStar(waypoint[i], waypoint[i+1], "euclidean", norm_occupancy_grid)
+        path, visited = astar.searching()
+        path.append(path)
+
+
     
 
-    path, visited = astar.searching()
 
     path_f = Path()
     path_f.name = 'test'
     path_f.columns = ['x', 'y', 'speed']  # 'x' and 'y' are required (these are the default)
-    path_f.anchor = (46.339159,3.433923, 278.142)  # INRAE, Aubière, France
+    path_f.anchor = (46.339159,3.433923, 279.18)  # for challenge
 
 
     for i in range(len(path)):
@@ -277,7 +299,7 @@ def main():
     # path_f.append_point([12.7, 3.3, 1.0])
     # path_f.append_point([12.75, 3.43, 1.0])
 
-    path_f.save('test_5.traj')
+    path_f.save('test_6.traj')
 
     
 
