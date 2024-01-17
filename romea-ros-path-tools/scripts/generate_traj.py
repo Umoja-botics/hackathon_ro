@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+import sys
+sys.path.append('/home/klein/ws/src/romea-ros-path-tools')
 from romea_path_tools.path import Path
 
 """
@@ -30,7 +31,7 @@ class AStar:
         #self.Env = env.Env()  # class Env
         # obstacle_positions = np.argwhere(map_matrix == -1)
         #self.u_set = self.Env.motions  # feasible input set
-        self.obs = np.argwhere( self.grid == 0.5) # position of obstacles
+        self.obs = np.argwhere( self.grid == -1) # position of obstacles
 
         self.OPEN = []  # priority queue / OPEN set
         self.CLOSED = []  # CLOSED set / VISITED order
@@ -138,7 +139,7 @@ class AStar:
             neighbor = (node[0] + direction[0], node[1] + direction[1])
             if (0 <= neighbor[0] < self.grid.shape[0] and
                 0 <= neighbor[1] < self.grid.shape[1] and
-                self.grid[neighbor[0], neighbor[1]] != 0.5):   # -1 represents obstacles
+                self.grid[neighbor[0], neighbor[1]] != -1):   # -1 represents obstacles
                 #print(neighbor)
                 neighbors.append(neighbor)
         return neighbors
@@ -168,7 +169,7 @@ class AStar:
         # if s_start in self.obs or s_end in self.obs:
         #     print('obstacle')
         #     return True
-        if self.grid[s_start] == 0.5 or self.grid[s_end] == 0.5:
+        if self.grid[s_start] == -1 or self.grid[s_end] == -1:
             return True
 
         if s_start[0] != s_end[0] and s_start[1] != s_end[1]:
@@ -245,6 +246,27 @@ def remap_coordinates(coord, grid_shape):
 
     return (new_x, new_y)
 
+def remap_inverse(coord, grid_shape):
+    
+    grid_shapes = (grid_shape.shape[0], grid_shape.shape[1])
+
+    #print(grid_shapes)
+    
+
+    
+    new_x_min, new_x_max = 0, 1250
+    new_y_min, new_y_max = 0, 1250
+
+   
+    x_scale =  (new_x_max - new_x_min) / 200
+    y_scale =  (new_y_max - new_y_min) / 205
+
+   
+    new_x = new_x_min + coord[0] * x_scale  
+    new_y = new_y_min + coord[1] * y_scale   # en convertissant en entier on aura environ 1px d'erreur soit 0.2m d'erreur
+
+    return (int(new_x), int(new_y))
+
 def import_json(json_file_path):
 
     point = []
@@ -252,9 +274,9 @@ def import_json(json_file_path):
     with open(json_file_path, 'r') as file:
         json_data = json.load(file)
     
-    point.append((json_data["start"][3:][0],json_data["start"][3:][1]))
+    point.append(((json_data["start"][3:][0]),(json_data["start"][3:][1])))
     for i in range (len(json_data["waypoints"])):
-        point.append((json_data["waypoints"][i][3:][0],json_data["waypoints"][i][3:][1]))
+        point.append(((json_data["waypoints"][i][3:][0]),(json_data["waypoints"][i][3:][1])))
         
     return point
 
@@ -263,7 +285,7 @@ def main():
 
         # Load the map matrix
     map_matrix_path = 'map_matrix.npy'  # Update this to the correct path
-    json_file_path = 'challenge1_waypoints_01.json' # import the json file
+    json_file_path = '/home/klein/ws/src/romea-ros-path-tools/scripts/challenge1_waypoints_01.json' # import the json file
     map_matrix = np.load(map_matrix_path)
     norm_occupancy_grid = np.copy(map_matrix)
     norm_occupancy_grid[norm_occupancy_grid == -1] = 50
@@ -273,12 +295,29 @@ def main():
     # s_goal = (400, 500)
 
     waypoint = import_json(json_file_path)
+    print(waypoint[0])
+    w1 = remap_inverse(waypoint[0],map_matrix)
+    print(w1)
+    w = remap_coordinates(w1, map_matrix)
+
+    print(w)
+    
+    Paths = []
 
     for i in range (len(waypoint)-1):
 
-        astar = AStar(waypoint[i], waypoint[i+1], "euclidean", norm_occupancy_grid)
+        w1 = remap_inverse(waypoint[i],map_matrix) # transformation point map reel en point px
+        #print("w1",waypoint[i])
+        
+        w2 = remap_inverse(waypoint[i+1],map_matrix)
+        #print("w2",waypoint[i+1])
+       
+
+        astar = AStar(w1, w2, "euclidean", map_matrix)
+        # astar = AStar(waypoint[i], waypoint[i+1], "euclidean", map_matrix)
         path, visited = astar.searching()
-        path.append(path)
+        Paths.extend(path)
+        
 
 
     
@@ -290,8 +329,8 @@ def main():
     path_f.anchor = (46.339159,3.433923, 279.18)  # for challenge
 
 
-    for i in range(len(path)):
-        path_remap = remap_coordinates(path[i], map_matrix)
+    for i in range(len(Paths)):
+        path_remap = remap_coordinates(Paths[i], map_matrix)
         path_f.append_point([path_remap[0], path_remap[1], 1.0])
 
     # path_f.append_point([12.5, 3.2, 1.0])
@@ -299,7 +338,7 @@ def main():
     # path_f.append_point([12.7, 3.3, 1.0])
     # path_f.append_point([12.75, 3.43, 1.0])
 
-    path_f.save('test_6.traj')
+    path_f.save('test_616.traj')
 
     
 

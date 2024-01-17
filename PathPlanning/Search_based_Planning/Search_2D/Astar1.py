@@ -289,17 +289,70 @@ def main():
     norm_occupancy_grid[norm_occupancy_grid == -1] = 50
     norm_occupancy_grid = norm_occupancy_grid / 100
 
-    s_start = (5, 5)
-    s_goal = (250, 1050)
+    s_start = (543, 712)
+    s_goal = (404, 766)
 
-    waypoint = import_json(json_file_path)
+    waypoint = [(543, 712),(404, 766),(812, 815),(447, 810),(612, 652),(751, 665),(953, 813),(1013, 953),(915, 1013),(750, 1060)]
+
+    # w1 (543, 712)
+    # w2 (404, 766)
+    # w2 (812, 815)
+    # w1 (812, 815)
+    # w2 (447, 810)
+    # w1 (447, 810)
+    # w2 (204, 712)
+    # w1 (204, 712)
+    # w2 (612, 652)
+    # w1 (612, 652)
+    # w2 (751, 665)
+    # w1 (751, 665)
+    # w2 (953, 813)
+    # w1 (953, 813)
+    # w2 (1013, 953)
+    # w1 (1013, 953)
+    # w2 (915, 1013)
+    # w1 (915, 1013)
+    # w2 (750, 1060)
+    # w1 (750, 1060)
+    # w2 (720, 948)
+    # w1 (720, 948)
+    # w2 (649, 923)
+    # w1 (649, 923)
+    # w2 (556, 852)
+    # w1 (404, 766)
+    # w2 (812, 815)
+    # w1 (812, 815)
+    # w2 (447, 810)
+    # w1 (447, 810)
+    # w2 (204, 712)
+    # w1 (204, 712)
+    # w2 (612, 652)
+    # w1 (612, 652)
+    # w2 (751, 665)
+    # w1 (751, 665)
+    # w2 (953, 813)
+    # w1 (953, 813)
+    # w2 (1013, 953)
+    # w1 (1013, 953)
+    # w2 (915, 1013)
+    # w1 (915, 1013)
+    # w2 (750, 1060)
+    # w1 (750, 1060)
+    # w2 (720, 948)
+    # w1 (720, 948)
+    # w2 (649, 923)
+    # w1 (649, 923)
+    # w2 (556, 852)
+
+    # waypoint = import_json(json_file_path)
+    Paths = []
 
     for i in range (len(waypoint)-1):
-        print(waypoint[i])
+        
 
         astar = AStar(waypoint[i], waypoint[i+1], "euclidean", map_matrix)
         path, visited = astar.searching()
-        path.append(path)
+        Paths.extend(path)
 
     # astar = AStar(s_start, s_goal, "euclidean", map_matrix)
     # plot = plotting.Plotting(s_start, s_goal)
@@ -307,7 +360,7 @@ def main():
     # path, visited = astar.searching()
     #plot.animation(path, visited, "A*")  # animation
 
-    plot_map(map_matrix, path, s_start, s_goal)
+    plot_map(map_matrix, Paths, s_start, s_goal)
    # print(path[0][1])
    # print(type(path))
 
